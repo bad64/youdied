@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -42,11 +43,19 @@ int main(int argc, char* argv[])
 
     TTF_Font* font = TTF_OpenFont("OptimusPrinceps.ttf", 128);
 
-    SDL_Surface* srfbuf = TTF_RenderText_Solid(font, message, red);
+	//Create text texture
+    SDL_Surface* textbuf = TTF_RenderText_Solid(font, message, red);
+	SDL_Surface* srfbuf = SDL_CreateRGBSurface(0, textbuf->w, textbuf->w, 32, 0, 0, 0, 255);	//Create square texture to solve aspect ratio scaling issues
+	SDL_Rect tmprect = {0, srfbuf->h/2 - textbuf->h/2, 0, 0};
+	SDL_BlitSurface(textbuf, NULL, srfbuf, &tmprect);
     SDL_Texture* text = SDL_CreateTextureFromSurface(renderer, srfbuf);
     SDL_FreeSurface(srfbuf);
+	
+	//Set text to the right size
     SDL_Rect recttext = {0, 0, 0, 0};
     SDL_QueryTexture(text, NULL, NULL, &recttext.w, &recttext.h);
+	recttext.w = recttext.w * 0.9;
+	recttext.h = recttext.h * 0.9;
     recttext.x = Width/2 - recttext.w/2;
     recttext.y = Height/2 - recttext.h/2;
 
@@ -76,31 +85,31 @@ int main(int argc, char* argv[])
                 }
             }
         }
-
+		
         //Main section
         if (currentframe < 60)
         {
-            bar_alpha += 0.017; //0.017 ~= (10/60)/10
+            bar_alpha += 0.016; //0.017 ~= (10/60)/10, so we do one step lower to get the transparency effect
             SDL_SetWindowOpacity(window, bar_alpha);
         }
 
-        if ((currentframe > 60) && (currentframe < 120))
+        if (currentframe > 20)
+        {
+			recttext.w = (recttext.w + 1) * (1 + recttext.w / 1000);
+			recttext.h = (recttext.h + 1) * (1 + recttext.h / 1000);
+            recttext.x = Width/2 - recttext.w/2;
+            recttext.y = Height/2 - recttext.h/2;
+        }
+		
+		if ((currentframe > 30) && (currentframe < 90))
         {
             text_alpha += 255 / 60;
             SDL_SetTextureAlphaMod(text, text_alpha);
         }
 
-        if ((currentframe > 60) && (currentframe % 2 == 0))
-        {
-            recttext.w = (recttext.w + 1) * 1.004;
-            recttext.h = (recttext.h + 1) * 1.001;
-            recttext.x = Width/2 - recttext.w/2;
-            recttext.y = Height/2 - recttext.h/2;
-        }
-
         if ((currentframe > 240) && (currentframe < 300))
         {
-            text_alpha -= 255 / 60;
+            text_alpha -= 250 / 60;
             SDL_SetTextureAlphaMod(text, text_alpha);
             bar_alpha -= 0.017;
             SDL_SetWindowOpacity(window, bar_alpha);
