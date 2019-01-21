@@ -34,7 +34,9 @@ int main(int argc, char* argv[])
 		message = "YOU DIED";
 
 	if (fontname.empty())
-		fontname = "/usr/share/fonts/OptimusPrinceps.ttf";
+	{
+		fontname = "OptimusPrinceps.ttf";
+	}
 
 	//Frame counter subsystem
 	uint64_t currentframe = 0;
